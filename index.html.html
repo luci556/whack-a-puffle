@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Whack-a-Puffle | Help Force Arcade</title>
+
+<style>
+/* ===================================
+   HELP FORCE - WHACK A PUFFLE
+   =================================== */
+
+:root {
+  --hf-blue: #006dc8;
+  --hf-dark: #082e60;
+  --hf-yellow: #ffcf33;
+  --hf-white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 12px;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #05336c;
+  color: white;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font-family: inherit;
+  touch-action: manipulation;
+}
+
+/* GAME CONTAINER */
+
+.game {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 22px 16px;
+  background: linear-gradient(
+    155deg,
+    #167dd5 0%,
+    #07509c 45%,
+    #082e60 100%
+  );
+  border: 4px solid var(--hf-yellow);
+  border-radius: 22px;
+  box-shadow: 0 8px 24px #0003;
+}
+
+/* HEADER */
+
+.arcade-label {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--hf-yellow);
+  color: var(--hf-dark);
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.game h1 {
+  color: white;
+  font-size: clamp(23px, 6vw, 32px);
+  margin: 16px 0 7px;
+  line-height: 1.15;
+  font-weight: 900;
+  text-shadow: 2px 3px #002a56;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #d6eeff;
+  margin: 0 0 18px;
+}
+
+/* SCOREBOARD */
+
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.stat {
+  padding: 10px 4px;
+  background: #ffffff20;
+  border: 1px solid #ffffff45;
+  border-radius: 12px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+
+.stat-value {
+  display: block;
+  margin-top: 5px;
+  color: var(--hf-yellow);
+  font-size: 29px;
+  font-weight: 900;
+}
+
+/* TIMER BAR */
+
+.timer-track {
+  height: 8px;
+  margin-bottom: 16px;
+  background: #03244c;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.timer-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--hf-yellow);
+  border-radius: inherit;
+  transition: width .1s linear;
+}
+
+/* GAME BOARD */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 13px;
+  background: #05336c;
+  border: 2px solid #ffffff25;
+  border-radius: 18px;
+}
+
+.hole {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-bottom: 5px solid #02152e;
+  border-radius: 50%;
+  background: #031c3c;
+  cursor: default;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.hole.active {
+  background: #174b83;
+  cursor: pointer;
+}
+
+.hole.active:focus-visible {
+  outline: 3px solid var(--hf-yellow);
+  outline-offset: 2px;
+}
+
+/* PUFFLE BODY */
+
+.puffle {
+  position: absolute;
+  bottom: 5%;
+  left: 11%;
+  width: 78%;
+  height: 73%;
+
+  border-radius: 48% 48% 44% 44%;
+  background:
+    radial-gradient(circle at 30% 25%, #ffffff30, transparent 45%),
+    var(--fur);
+  border: 2px solid #0002;
+
+  box-shadow:
+    inset -8px -7px 0 #0002,
+    inset 5px 5px 0 #ffffff25,
+    0 0 0 3px #ffffff18;
+
+  pointer-events: none;
+  animation: pop-up .13s ease-out;
+}
+
+.puffle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    radial-gradient(circle at 20% 30%, #0000000f 1px, transparent 1.6px),
+    radial-gradient(circle at 62% 18%, #0000000f 1px, transparent 1.6px),
+    radial-gradient(circle at 38% 55%, #ffffff28 1px, transparent 1.6px),
+    radial-gradient(circle at 78% 50%, #0000000f 1px, transparent 1.6px),
+    radial-gradient(circle at 22% 78%, #ffffff22 1px, transparent 1.6px),
+    radial-gradient(circle at 82% 82%, #0000000f 1px, transparent 1.6px),
+    radial-gradient(circle at 55% 85%, #0000000f 1px, transparent 1.6px);
+  background-size: 20% 20%;
+  pointer-events: none;
+}
+
+.cheek {
+  position: absolute;
+  top: 52%;
+  width: 15%;
+  height: 11%;
+  background: #ff6b8a;
+  opacity: .45;
+  border-radius: 50%;
+}
+
+.cheek.left {
+  left: 12%;
+}
+
+.cheek.right {
+  right: 12%;
+}
+
+/* PUFFLE FEET */
+
+.foot {
+  position: absolute;
+  bottom: -6%;
+  width: 22%;
+  height: 16%;
+  background: var(--fur);
+  border: 2px solid #0002;
+  border-radius: 50%;
+}
+
+.foot.left {
+  left: 14%;
+}
+
+.foot.right {
+  right: 14%;
+}
+
+/* PUFFLE HAIR TUFTS */
+
+.tuft {
+  position: absolute;
+  top: -18%;
+  width: 15%;
+  border-radius: 50%;
+  background: var(--fur);
+  border: 2px solid #0002;
+  box-shadow: inset -3px -2px 0 #0002, inset 2px 2px 0 #ffffff30;
+  transform-origin: bottom center;
+}
+
+.tuft-1 {
+  left: 10%;
+  height: 26%;
+  transform: rotate(-26deg);
+}
+
+.tuft-2 {
+  left: 26%;
+  top: -26%;
+  height: 34%;
+  transform: rotate(-11deg);
+}
+
+.tuft-3 {
+  left: 43%;
+  top: -30%;
+  height: 38%;
+  transform: rotate(3deg);
+}
+
+.tuft-4 {
+  left: 60%;
+  top: -25%;
+  height: 32%;
+  transform: rotate(16deg);
+}
+
+.tuft-5 {
+  left: 76%;
+  height: 24%;
+  transform: rotate(28deg);
+}
+
+/* PUFFLE EYES */
+
+.eye {
+  position: absolute;
+  top: 30%;
+  width: 19%;
+  height: 26%;
+  background: #181a22;
+  border-radius: 50%;
+}
+
+.eye.left {
+  left: 25%;
+}
+
+.eye.right {
+  right: 25%;
+}
+
+.eye::after {
+  content: "";
+  position: absolute;
+  top: 16%;
+  left: 20%;
+  width: 37%;
+  height: 29%;
+  background: white;
+  border-radius: 50%;
+}
+
+/* PUFFLE SMILE */
+
+.mouth {
+  position: absolute;
+  bottom: 17%;
+  left: 39%;
+  width: 22%;
+  height: 15%;
+  border-bottom: 3px solid #171722;
+  border-radius: 50%;
+}
+
+@keyframes pop-up {
+  from {
+    transform: translateY(85%) scale(.6);
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* GAME MESSAGE */
+
+.message {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+  color: #ffe36a;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: bold;
+}
+
+/* START BUTTON */
+
+.start-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--hf-yellow);
+  color: #123b72;
+  border: 0;
+  border-bottom: 5px solid #c99619;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.start-btn:hover:not(:disabled) {
+  background: #ffe47a;
+}
+
+.start-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 3px;
+}
+
+.start-btn:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+/* FOOTER */
+
+.instructions {
+  margin: 15px 0 0;
+  font-size: 11px;
+  color: #c5e6ff;
+}
+
+.footer {
+  margin-top: 18px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #a8d5f8;
+}
+
+@media (max-width: 360px) {
+  body {
+    padding: 5px;
+  }
+
+  .game {
+    padding: 16px 10px;
+  }
+
+  .board {
+    gap: 7px;
+    padding: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puffle {
+    animation: none;
+  }
+
+  .timer-fill {
+    transition: none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="game">
+
+  <div class="arcade-label">
+    HELP FORCE ARCADE
+  </div>
+
+  <h1>🐧 WHACK-A-PUFFLE!</h1>
+
+  <p class="subtitle">
+    Catch those pesky puffles before they disappear!
+  </p>
+
+  <!-- SCOREBOARD -->
+
+  <div class="scoreboard">
+
+    <div class="stat">
+      <span class="stat-label">⭐ SCORE</span>
+      <span class="stat-value" id="score">0</span>
+    </div>
+
+    <div class="stat">
+      <span class="stat-label">⏱ TIME</span>
+      <span class="stat-value" id="time">30</span>
+    </div>
+
+    <div class="stat">
+      <span class="stat-label">🏆 BEST</span>
+      <span class="stat-value" id="best">0</span>
+    </div>
+
+  </div>
+
+  <!-- TIMER BAR -->
+
+  <div class="timer-track">
+    <div class="timer-fill" id="timerBar"></div>
+  </div>
+
+  <!-- TWENTY HOLES (5x4) -->
+
+  <div class="board" id="board">
+
+    <button class="hole" type="button" aria-label="Hole 1"></button>
+    <button class="hole" type="button" aria-label="Hole 2"></button>
+    <button class="hole" type="button" aria-label="Hole 3"></button>
+    <button class="hole" type="button" aria-label="Hole 4"></button>
+    <button class="hole" type="button" aria-label="Hole 5"></button>
+    <button class="hole" type="button" aria-label="Hole 6"></button>
+    <button class="hole" type="button" aria-label="Hole 7"></button>
+    <button class="hole" type="button" aria-label="Hole 8"></button>
+    <button class="hole" type="button" aria-label="Hole 9"></button>
+    <button class="hole" type="button" aria-label="Hole 10"></button>
+    <button class="hole" type="button" aria-label="Hole 11"></button>
+    <button class="hole" type="button" aria-label="Hole 12"></button>
+    <button class="hole" type="button" aria-label="Hole 13"></button>
+    <button class="hole" type="button" aria-label="Hole 14"></button>
+    <button class="hole" type="button" aria-label="Hole 15"></button>
+    <button class="hole" type="button" aria-label="Hole 16"></button>
+    <button class="hole" type="button" aria-label="Hole 17"></button>
+    <button class="hole" type="button" aria-label="Hole 18"></button>
+    <button class="hole" type="button" aria-label="Hole 19"></button>
+    <button class="hole" type="button" aria-label="Hole 20"></button>
+
+  </div>
+
+  <!-- STATUS MESSAGE -->
+
+  <div class="message"
+       id="message"
+       aria-live="polite">
+
+    Ready to catch some puffles?
+
+  </div>
+
+  <!-- START BUTTON -->
+
+  <button class="start-btn"
+          id="startButton"
+          type="button">
+
+    START GAME
+
+  </button>
+
+  <p class="instructions">
+    Click or tap the puffles! You have 30 seconds.
+  </p>
+
+  <div class="footer">
+    THE BEACON • HELP FORCE
+  </div>
+
+</main>
+
+<script>
+/* ===================================
+   WHACK A PUFFLE - GAME LOGIC
+   =================================== */
+
+(function () {
+  "use strict";
+
+  const GAME_DURATION = 30000;
+  const STORAGE_KEY = "helpforce_whack_puffle_best";
+
+  const holes = Array.from(
+    document.querySelectorAll(".hole")
+  );
+
+  const scoreDisplay = document.getElementById("score");
+  const timeDisplay = document.getElementById("time");
+  const bestDisplay = document.getElementById("best");
+  const timerBar = document.getElementById("timerBar");
+  const message = document.getElementById("message");
+  const startButton = document.getElementById("startButton");
+
+  /* PUFFLE COLORS */
+
+  const colors = [
+    "#f44336",  // Red
+    "#ffdc35",  // Yellow
+    "#4acb62",  // Green
+    "#ed83d8",  // Pink
+    "#4abaff",  // Blue
+    "#ff963f",  // Orange
+    "#eeeef2",  // White
+    "#a477dd",  // Purple
+    "#30313b"   // Black
+  ];
+
+  /* GAME STATE */
+
+  let score = 0;
+  let best = 0;
+
+  let playing = false;
+  let activeHole = -1;
+  let previousHole = -1;
+
+  let spawnTimer = null;
+  let clockTimer = null;
+
+  let endTime = 0;
+  let remainingTime = GAME_DURATION;
+
+  /* LOAD SAVED HIGH SCORE */
+
+  try {
+    best = Number(
+      localStorage.getItem(STORAGE_KEY)
+    ) || 0;
+  } catch (error) {
+    best = 0;
+  }
+
+  bestDisplay.textContent = best;
+
+  /* REMOVE ALL PUFFLES */
+
+  function clearPuffles() {
+
+    holes.forEach((hole, index) => {
+
+      hole.innerHTML = "";
+
+      hole.classList.remove("active");
+
+      hole.setAttribute(
+        "aria-label",
+        "Empty hole " + (index + 1)
+      );
+
+    });
+
+    activeHole = -1;
+  }
+
+  /* PICK A RANDOM HOLE */
+
+  function randomHole() {
+
+    let index;
+
+    do {
+
+      index = Math.floor(
+        Math.random() * holes.length
+      );
+
+    } while (index === previousHole);
+
+    previousHole = index;
+
+    return index;
+  }
+
+  /* CREATE PUFFLE */
+
+  function createPuffle(color) {
+
+    const puffle = document.createElement("span");
+
+    puffle.className = "puffle";
+    puffle.style.setProperty("--fur", color);
+
+    const hair = document.createDocumentFragment();
+    for (let i = 1; i <= 5; i++) {
+      const tuft = document.createElement("span");
+      tuft.className = "tuft tuft-" + i;
+      hair.appendChild(tuft);
+    }
+
+    const leftEye = document.createElement("span");
+    leftEye.className = "eye left";
+
+    const rightEye = document.createElement("span");
+    rightEye.className = "eye right";
+
+    const mouth = document.createElement("span");
+    mouth.className = "mouth";
+
+    const leftCheek = document.createElement("span");
+    leftCheek.className = "cheek left";
+
+    const rightCheek = document.createElement("span");
+    rightCheek.className = "cheek right";
+
+    const leftFoot = document.createElement("span");
+    leftFoot.className = "foot left";
+
+    const rightFoot = document.createElement("span");
+    rightFoot.className = "foot right";
+
+    puffle.appendChild(leftFoot);
+    puffle.appendChild(rightFoot);
+    puffle.appendChild(hair);
+    puffle.appendChild(leftEye);
+    puffle.appendChild(rightEye);
+    puffle.appendChild(leftCheek);
+    puffle.appendChild(rightCheek);
+    puffle.appendChild(mouth);
+
+    return puffle;
+  }
+
+  /* DISPLAY A NEW PUFFLE */
+
+  function showPuffle() {
+
+    if (!playing) return;
+
+    if (Date.now() >= endTime) {
+      endGame();
+      return;
+    }
+
+    clearPuffles();
+
+    const index = randomHole();
+
+    const color = colors[
+      Math.floor(Math.random() * colors.length)
+    ];
+
+    const hole = holes[index];
+
+    activeHole = index;
+
+    hole.classList.add("active");
+
+    hole.setAttribute(
+      "aria-label",
+      "Catch puffle in hole " + (index + 1)
+    );
+
+    hole.appendChild(createPuffle(color));
+
+    /* FASTER PUFFLES AS SCORE INCREASES */
+
+    const speed = Math.max(
+      400,
+      1000 - score * 12
+    );
+
+    spawnTimer = setTimeout(showPuffle, speed);
+  }
+
+  /* UPDATE TIMER */
+
+  function updateTimer() {
+
+    if (!playing) return;
+
+    remainingTime = Math.max(
+      0,
+      endTime - Date.now()
+    );
+
+    const seconds = Math.ceil(
+      remainingTime / 1000
+    );
+
+    timeDisplay.textContent = seconds;
+
+    const percentage =
+      (remainingTime / GAME_DURATION) * 100;
+
+    timerBar.style.width = percentage + "%";
+
+    if (remainingTime <= 0) {
+      endGame();
+    }
+  }
+
+  /* SAVE HIGH SCORE */
+
+  function saveBest() {
+
+    if (score <= best) {
+      return false;
+    }
+
+    best = score;
+
+    bestDisplay.textContent = best;
+
+    try {
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        String(best)
+      );
+
+    } catch (error) {
+
+      // Storage may be disabled.
+      // The game will still work.
+
+    }
+
+    return true;
+  }
+
+  /* END GAME */
+
+  function endGame() {
+
+    if (!playing) return;
+
+    playing = false;
+
+    clearTimeout(spawnTimer);
+    clearInterval(clockTimer);
+
+    clearPuffles();
+
+    timeDisplay.textContent = "0";
+    timerBar.style.width = "0%";
+
+    const newRecord = saveBest();
+
+    if (newRecord) {
+
+      message.textContent =
+        "🏆 NEW HIGH SCORE! " +
+        score +
+        " PUFFLES CAUGHT!";
+
+    } else if (score >= 35) {
+
+      message.textContent =
+        "🔥 PUFFLE MASTER! " +
+        score +
+        " POINTS!";
+
+    } else if (score >= 20) {
+
+      message.textContent =
+        "⭐ AMAZING WORK! " +
+        score +
+        " POINTS!";
+
+    } else if (score >= 10) {
+
+      message.textContent =
+        "🐧 GOOD JOB! " +
+        score +
+        " POINTS!";
+
+    } else {
+
+      message.textContent =
+        "KEEP PRACTICING! " +
+        score +
+        " POINTS!";
+
+    }
+
+    startButton.disabled = false;
+    startButton.textContent = "PLAY AGAIN";
+  }
+
+  /* START NEW GAME */
+
+  function startGame() {
+
+    if (playing) return;
+
+    clearTimeout(spawnTimer);
+    clearInterval(clockTimer);
+
+    score = 0;
+    remainingTime = GAME_DURATION;
+    previousHole = -1;
+
+    scoreDisplay.textContent = "0";
+    timeDisplay.textContent = "30";
+
+    timerBar.style.width = "100%";
+
+    message.textContent =
+      "GO! CATCH THOSE PUFFLES!";
+
+    startButton.disabled = true;
+    startButton.textContent = "GAME IN PROGRESS";
+
+    playing = true;
+
+    endTime = Date.now() + GAME_DURATION;
+
+    showPuffle();
+
+    clockTimer = setInterval(updateTimer, 100);
+  }
+
+  /* HANDLE A PUFFLE CLICK */
+
+  function catchPuffle(index) {
+
+    if (!playing) return;
+
+    // Ensure the 30-second deadline is respected.
+    if (Date.now() >= endTime) {
+      endGame();
+      return;
+    }
+
+    // Ignore empty holes.
+    if (index !== activeHole) return;
+
+    // Count the successful catch.
+    score++;
+
+    scoreDisplay.textContent = score;
+
+    // Prevent counting the same puffle twice.
+    clearTimeout(spawnTimer);
+    clearPuffles();
+
+    // Show the next puffle shortly after.
+    spawnTimer = setTimeout(
+      showPuffle,
+      160
+    );
+  }
+
+  /* REGISTER HOLE CLICKS */
+
+  holes.forEach((hole, index) => {
+
+    hole.addEventListener("click", function () {
+
+      catchPuffle(index);
+
+    });
+
+  });
+
+  /* REGISTER START BUTTON */
+
+  startButton.addEventListener(
+    "click",
+    startGame
+  );
+
+})();
+</script>
+
+</body>
+</html>
